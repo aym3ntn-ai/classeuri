@@ -1,0 +1,65 @@
+name: Deploy site
+
+# Any push that adds PDFs or changes the web app rebuilds catalog.json and the site.
+# Pushes that only touch the mobile app are handled by android.yml.
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - 'app/**'
+      - 'docs/**'
+      - '**/*.md'
+      - '.github/workflows/android.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Let a running deployment finish; queue only the latest push behind it.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+env:
+  CLASSEURI_BASE_URL: https://aym3ntn-ai.github.io/classeuri/
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Full history: each document's "last modified" is its last commit date.
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - run: npm ci
+
+      - name: Test the catalog generator
+        run: npm test
+
+      - name: Generate catalog.json and collect the PDFs
+        run: node scripts/build-catalog.ts --out web/public/catalog.json --files-out web/public/files
+
+      - name: Build the web app
+        run: npm run build --workspace web
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: web/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
