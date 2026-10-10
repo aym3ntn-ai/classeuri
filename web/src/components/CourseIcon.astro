@@ -1,0 +1,15 @@
+---
+import type { CourseIcon as IconName } from '@classeuri/shared';
+import { Activity, Atom, BookOpen, Code, Cog, Cpu, FlaskConical, Globe, Sigma, Zap } from '@lucide/astro';
+
+interface Props {
+  name: IconName;
+  size?: number;
+}
+
+const ICONS = { book: BookOpen, bolt: Zap, chip: Cpu, wave: Activity, atom: Atom, function: Sigma, code: Code, flask: FlaskConical, globe: Globe, gear: Cog };
+const { name, size = 26 } = Astro.props;
+const Icon = ICONS[name] ?? BookOpen;
+---
+
+<Icon size={size} stroke-width={1.8} aria-hidden="true" />

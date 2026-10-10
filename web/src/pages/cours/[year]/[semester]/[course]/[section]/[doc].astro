@@ -1,0 +1,308 @@
+---
+import { ChevronLeft, Download, Minus, Plus } from '@lucide/astro';
+import type { CatalogDocument, SectionKind } from '@classeuri/shared';
+import Base from '../../../../../../layouts/Base.astro';
+import { allCourseEntries, courseHref, fileHref, fileName, SECTION_ROUTES, type CourseEntry } from '../../../../../../lib/catalog';
+import { t } from '../../../../../../lib/i18n';
+
+export function getStaticPaths() {
+  return allCourseEntries().flatMap((entry) =>
+    entry.course.sections.flatMap((section) =>
+      section.documents.map((doc) => ({
+        params: {
+          year: entry.year.id,
+          semester: entry.semester.id,
+          course: entry.course.slug,
+          section: SECTION_ROUTES[section.kind],
+          doc: doc.slug,
+        },
+        props: { ...entry, kind: section.kind, doc },
+      })),
+    ),
+  );
+}
+
+type Props = CourseEntry & { kind: SectionKind; doc: CatalogDocument };
+const { course, kind, doc } = Astro.props;
+
+// Everything the viewer script needs, including its strings from the dictionary.
+const config = {
+  docId: doc.id,
+  sheet: { url: fileHref(doc), name: fileName(doc) },
+  solution: doc.solution ? { url: fileHref(doc.solution), name: fileName(doc.solution) } : null,
+  strings: {
+    pageOf: t.viewer.pageOf(0, 0).replace(/0/g, '%'),
+    resumedAt: t.viewer.resumedAt(0).replace('0', '%'),
+    error: t.errors.pdf,
+  },
+};
+---
+
+<Base title={doc.title} bare>
+  <div class="viewer" id="viewer" data-config={JSON.stringify(config)}>
+    <header class="bar">
+      <a class="round" href={courseHref(course)} aria-label={t.common.back}>
+        <ChevronLeft size={24} stroke-width={2} aria-hidden="true" />
+      </a>
+      <div class="titles">
+        <h1>{doc.title}</h1>
+        <p>{course.name} · {t.sections[kind]}</p>
+      </div>
+      <a class="download" data-download href={fileHref(doc)} download={fileName(doc)}>
+        <Download size={20} stroke-width={1.8} aria-hidden="true" />
+        <span>{t.viewer.download}</span>
+      </a>
+    </header>
+
+    {
+      doc.solution && (
+        <div class="variants" role="group">
+          <button type="button" data-variant="sheet" aria-pressed="true">
+            {t.document.withoutSolution}
+          </button>
+          <button type="button" data-variant="solution" aria-pressed="false">
+            {t.document.withSolution}
+          </button>
+        </div>
+      )
+    }
+
+    <main class="pages" data-pages tabindex="0" aria-label={doc.title}>
+      <p class="status" data-status>{t.viewer.loading}</p>
+    </main>
+    <p class="toast" data-toast hidden></p>
+
+    <footer class="tools">
+      <span class="mono pill" data-page-label aria-live="polite"></span>
+      <form class="goto" data-goto>
+        <label for="goto-input">{t.viewer.goToPage}</label>
+        <input id="goto-input" type="number" inputmode="numeric" min="1" step="1" data-goto-input />
+        <button type="submit">{t.viewer.go}</button>
+      </form>
+      <div class="zoom">
+        <button type="button" class="round" data-zoom="out" aria-label={t.viewer.zoomOut}>
+          <Minus size={20} stroke-width={2} aria-hidden="true" />
+        </button>
+        <button type="button" class="fit" data-zoom="fit">{t.viewer.fitWidth}</button>
+        <button type="button" class="round" data-zoom="in" aria-label={t.viewer.zoomIn}>
+          <Plus size={20} stroke-width={2} aria-hidden="true" />
+        </button>
+      </div>
+    </footer>
+  </div>
+</Base>
+
+<script>
+  import '../../../../../../scripts/viewer.ts';
+</script>
+
+<style is:global>
+  /* The reader keeps its dark surround in both themes. */
+  .viewer {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--reader-bg);
+    color: #fff;
+  }
+
+  .viewer .bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+  }
+
+  .viewer .round {
+    flex: none;
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--reader-chrome);
+    color: #fff;
+  }
+
+  .viewer .titles {
+    flex: 1;
+    min-width: 0;
+    text-align: center;
+  }
+
+  .viewer .titles h1 {
+    margin: 0;
+    font-size: 15px;
+    line-height: 20px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .viewer .titles p {
+    margin: 0;
+    font-size: 12.5px;
+    color: var(--reader-text-2);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .viewer .download {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    padding: 0 16px;
+    border-radius: 999px;
+    background: #fff;
+    color: #11151c;
+    font-weight: 700;
+    font-size: 14px;
+  }
+
+  .viewer .variants {
+    display: flex;
+    align-self: center;
+    width: min(100% - 28px, 420px);
+    margin-bottom: 10px;
+    padding: 3px;
+    border-radius: 12px;
+    background: var(--reader-chrome);
+  }
+
+  .viewer .variants button {
+    flex: 1;
+    min-height: 40px;
+    border-radius: 9px;
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--reader-text-2);
+  }
+
+  .viewer .variants button[aria-pressed='true'] {
+    background: #fff;
+    color: #11151c;
+  }
+
+  .viewer .pages {
+    flex: 1;
+    overflow: auto;
+    padding: 6px 14px 20px;
+    outline-offset: -2px;
+  }
+
+  .viewer .pdf-page {
+    display: block;
+    margin: 0 auto 12px;
+    background: #fff;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .viewer .pdf-page canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .viewer .status {
+    margin: 30vh 0 0;
+    text-align: center;
+    color: var(--reader-text-2);
+  }
+
+  .viewer .toast {
+    position: absolute;
+    left: 50%;
+    bottom: 96px;
+    transform: translateX(-50%);
+    margin: 0;
+    padding: 9px 16px;
+    border-radius: 999px;
+    background: #fff;
+    color: #11151c;
+    font-weight: 600;
+    font-size: 14px;
+    white-space: nowrap;
+  }
+
+  .viewer .tools {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px 14px;
+    padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+    background: var(--reader-footer);
+  }
+
+  .viewer .pill {
+    min-width: 72px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: var(--reader-chrome);
+    text-align: center;
+  }
+
+  .viewer .goto {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13.5px;
+    color: var(--reader-text-2);
+  }
+
+  .viewer .goto input {
+    width: 64px;
+    height: 44px;
+    padding: 0 8px;
+    border-radius: 12px;
+    border: 1px solid var(--reader-chrome);
+    background: var(--reader-bg);
+    color: #fff;
+    font-family: var(--font-mono);
+    text-align: center;
+  }
+
+  .viewer .goto button,
+  .viewer .fit {
+    min-height: 44px;
+    padding: 0 14px;
+    border-radius: 12px;
+    background: var(--reader-chrome);
+    color: #fff;
+    font-weight: 600;
+    font-size: 13.5px;
+  }
+
+  .viewer .zoom {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .viewer :focus-visible {
+    outline-color: #fff;
+  }
+
+  @media (max-width: 560px) {
+    .viewer .download span,
+    .viewer .goto label {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip-path: inset(50%);
+    }
+
+    .viewer .download {
+      width: 44px;
+      padding: 0;
+      justify-content: center;
+    }
+  }
+</style>

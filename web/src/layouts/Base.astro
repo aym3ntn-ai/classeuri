@@ -1,0 +1,95 @@
+---
+import '@fontsource-variable/schibsted-grotesk';
+import '@fontsource/ibm-plex-mono/500.css';
+import '../styles/global.css';
+import { href } from '../lib/catalog';
+import { lang, t } from '../lib/i18n';
+
+interface Props {
+  title?: string;
+  /** The PDF viewer fills the window and brings its own chrome. */
+  bare?: boolean;
+}
+
+const { title, bare = false } = Astro.props;
+const fullTitle = title ? `${title} · ${t.app.name}` : `${t.app.name} · ${t.app.tagline}`;
+const themes = [
+  { value: 'system', label: t.settings.themeSystem },
+  { value: 'light', label: t.settings.themeLight },
+  { value: 'dark', label: t.settings.themeDark },
+];
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="description" content={t.app.tagline} />
+    <meta name="theme-color" content="#11151C" />
+    <link rel="icon" type="image/png" href={href('icon.png')} />
+    <title>{fullTitle}</title>
+    <script is:inline>
+      // Before first paint, so a stored theme never flashes the other one.
+      try {
+        const theme = localStorage.getItem('classeuri.theme');
+        if (theme === 'light' || theme === 'dark') document.documentElement.dataset.theme = theme;
+      } catch {}
+    </script>
+  </head>
+  <body>
+    {
+      bare ? (
+        <slot />
+      ) : (
+        <>
+          <header class="site-header">
+            <a class="brand" href={href()}>
+              <img src={href('icon.png')} alt="" width="30" height="30" />
+              {t.app.name}
+            </a>
+            <div class="segmented" role="group" aria-label={t.settings.theme} data-theme-switch>
+              {themes.map((theme) => (
+                <button type="button" data-value={theme.value} aria-pressed="false">
+                  {theme.label}
+                </button>
+              ))}
+            </div>
+          </header>
+          <main class="page">
+            <slot />
+          </main>
+        </>
+      )
+    }
+    <script>
+      const group = document.querySelector<HTMLElement>('[data-theme-switch]');
+      if (group) {
+        const read = () => {
+          try {
+            return localStorage.getItem('classeuri.theme') ?? 'system';
+          } catch {
+            return 'system';
+          }
+        };
+        const apply = (value: string) => {
+          if (value === 'system') delete document.documentElement.dataset.theme;
+          else document.documentElement.dataset.theme = value;
+          for (const button of group.querySelectorAll('button')) {
+            button.setAttribute('aria-pressed', String(button.dataset.value === value));
+          }
+        };
+        apply(read());
+        group.addEventListener('click', (event) => {
+          const value = (event.target as HTMLElement).closest('button')?.dataset.value;
+          if (!value) return;
+          try {
+            localStorage.setItem('classeuri.theme', value);
+          } catch {}
+          apply(value);
+        });
+      }
+    </script>
+  </body>
+</html>

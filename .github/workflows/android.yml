@@ -24,9 +24,10 @@ on:
 permissions:
   contents: write
 
+# One build at a time; a newer push waits instead of cancelling a long Gradle build.
 concurrency:
   group: android
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   apk:

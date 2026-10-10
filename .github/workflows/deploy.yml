@@ -47,8 +47,10 @@ jobs:
       - name: Generate catalog.json and collect the PDFs
         run: node scripts/build-catalog.ts --out web/public/catalog.json --files-out web/public/files
 
-      - name: Build the web app
-        run: npm run build --workspace web
+      - name: Check and build the web app
+        run: |
+          npm run check --workspace web
+          npm run build --workspace web
 
       - uses: actions/upload-pages-artifact@v3
         with:

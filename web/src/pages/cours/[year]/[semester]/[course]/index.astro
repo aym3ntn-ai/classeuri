@@ -1,0 +1,188 @@
+---
+import { ChevronLeft, Download } from '@lucide/astro';
+import Base from '../../../../../layouts/Base.astro';
+import { allCourseEntries, docHref, fileHref, fileName, href, type CourseEntry } from '../../../../../lib/catalog';
+import { date, size, t } from '../../../../../lib/i18n';
+
+export function getStaticPaths() {
+  return allCourseEntries().map((entry) => ({
+    params: { year: entry.year.id, semester: entry.semester.id, course: entry.course.slug },
+    props: entry,
+  }));
+}
+
+type Props = CourseEntry;
+const { semester, course } = Astro.props;
+---
+
+<Base title={course.name}>
+  <a class="back-link" href={href()}>
+    <ChevronLeft size={22} stroke-width={2} aria-hidden="true" />
+    {t.tabs.courses}
+  </a>
+
+  <header class="hero" style={`--accent:${course.accent};--on-accent:${course.onAccent}`}>
+    <p class="mono">{course.code} · {semester.label}</p>
+    <h1>{course.name}</h1>
+    <p class="hero-meta">{t.common.documents(course.documentCount)} · {size(course.totalSize)}</p>
+  </header>
+
+  {
+    course.sections.map((section) => (
+      <section class="section">
+        <div class="section-head">
+          <h2 class="mono">{t.sections[section.kind]}</h2>
+          <span class="mono count">{String(section.documents.length).padStart(2, '0')}</span>
+        </div>
+        <ul class="card rows" style={`--accent:${course.accent}`}>
+          {section.documents.map((doc) => (
+            <li class="row">
+              <div class="row-main">
+                <a class="row-link" href={docHref(course, section.kind, doc.slug)}>
+                  <span class="row-title">{doc.title}</span>
+                  <span class="caption">
+                    {t.document.meta(doc.pages, size(doc.size))} · {t.document.updatedOn(date(doc.updatedAt))}
+                  </span>
+                </a>
+                <a class="row-download" href={fileHref(doc)} download={fileName(doc)} aria-label={`${t.common.download} : ${doc.title}`}>
+                  <Download size={22} stroke-width={1.8} aria-hidden="true" />
+                </a>
+              </div>
+              {doc.solution && (
+                <div class="chips">
+                  <a class="chip" href={docHref(course, section.kind, doc.slug)}>
+                    {t.document.withoutSolution} · {t.common.pagesShort(doc.pages)}
+                  </a>
+                  <a class="chip" href={docHref(course, section.kind, doc.slug, true)}>
+                    {t.document.withSolution} · {t.common.pagesShort(doc.solution.pages)}
+                  </a>
+                </div>
+              )}
+            </li>
+          ))}
+        </ul>
+      </section>
+    ))
+  }
+</Base>
+
+<style>
+  .hero {
+    margin-top: 6px;
+    padding: 22px;
+    border-radius: 24px;
+    background: var(--accent);
+    color: var(--on-accent);
+  }
+
+  .hero .mono {
+    margin: 0;
+    opacity: 0.85;
+  }
+
+  .hero h1 {
+    margin: 6px 0 0;
+    font-size: 32px;
+    line-height: 36px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+
+  .hero-meta {
+    margin: 12px 0 0;
+    font-size: 13.5px;
+  }
+
+  .section {
+    margin-top: 24px;
+  }
+
+  .section-head {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 2px;
+    margin-bottom: 8px;
+    color: var(--ink-2);
+  }
+
+  .section-head h2 {
+    margin: 0;
+  }
+
+  .count {
+    color: var(--ink-3);
+  }
+
+  .rows {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .row {
+    padding: 8px 6px 8px 14px;
+  }
+
+  .row + .row {
+    border-top: 1px solid var(--row-line);
+  }
+
+  .row-main {
+    display: flex;
+    align-items: center;
+  }
+
+  .row-link {
+    flex: 1;
+    min-width: 0;
+    min-height: 48px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+  }
+
+  .row-title {
+    font-size: 15.5px;
+    line-height: 20px;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+
+  .row-link:hover .row-title {
+    text-decoration: underline;
+  }
+
+  .row-download {
+    width: 48px;
+    height: 48px;
+    display: grid;
+    place-items: center;
+    border-radius: 12px;
+    color: var(--ink-3);
+  }
+
+  .row-download:hover {
+    color: var(--ink);
+    background: var(--bg);
+  }
+
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 4px 0 6px;
+  }
+
+  .chip {
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    padding: 0 12px;
+    border-radius: 8px;
+    border: 1px solid var(--row-line);
+    background: color-mix(in srgb, var(--accent, var(--ink)) 10%, var(--surface));
+    font-size: 12.5px;
+    font-weight: 600;
+  }
+</style>
