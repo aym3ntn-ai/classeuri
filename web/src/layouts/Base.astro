@@ -4,6 +4,10 @@ import '@fontsource/ibm-plex-mono/500.css';
 import '../styles/global.css';
 import { href } from '../lib/catalog';
 import { lang, t } from '../lib/i18n';
+import { Smartphone } from '@lucide/astro';
+
+/** Same file name in every release, so the link never changes. */
+const APK_URL = 'https://github.com/aym3ntn-ai/classeuri/releases/latest/download/classeuri.apk';
 
 interface Props {
   title?: string;
@@ -60,6 +64,13 @@ const themes = [
           <main class="page">
             <slot />
           </main>
+          <footer class="site-footer">
+            <a href={APK_URL}>
+              <Smartphone size={20} stroke-width={1.8} aria-hidden="true" />
+              {t.app.androidDownload}
+            </a>
+            <span class="caption">{t.app.androidHint}</span>
+          </footer>
         </>
       )
     }

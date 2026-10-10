@@ -8,6 +8,8 @@ export const fr = {
   app: {
     name: 'Classeuri',
     tagline: 'Ma bibliothèque de cours',
+    androidDownload: "Télécharger l'application Android",
+    androidHint: 'Fichier APK à installer sur le téléphone',
   },
 
   tabs: {

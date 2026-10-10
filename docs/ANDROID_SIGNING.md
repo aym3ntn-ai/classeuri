@@ -4,6 +4,18 @@ The `Android APK` workflow signs the APK with a key that only you hold. Android
 only installs an update over an existing app when both are signed with the same
 key, so create the keystore once and keep it for the life of the app.
 
+## Quick setup
+
+One script does steps 1 and 2 below and starts the first signed build. Run it
+yourself in a terminal, from the repo folder; it asks you to choose a password:
+
+```bash
+bash scripts/setup-signing.sh
+```
+
+It writes the keystore to `~/classeuri-release.jks`. Back up that file and the
+password, then skip to step 3. The manual steps follow for reference.
+
 ## 1. Create the keystore (once)
 
 Run this outside the repo. Pick one of the two ways; both give the same kind of file.
@@ -77,7 +89,9 @@ repository secret.
 3. Push to `main`.
 
 The workflow builds the APK, signs it, and publishes the release `v1.0.1` with
-`classeuri-1.0.1.apk` attached. A push that changes app code without bumping
+two copies attached: `classeuri-1.0.1.apk`, and `classeuri.apk`, whose name
+never changes so this link always downloads the newest version:
+https://github.com/aym3ntn-ai/classeuri/releases/latest/download/classeuri.apk A push that changes app code without bumping
 the version still builds an APK, available for 30 days under the workflow run's
 artifacts, but publishes no release.
 

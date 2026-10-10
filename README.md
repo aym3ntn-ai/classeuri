@@ -4,7 +4,7 @@ Ma bibliothèque de cours : un site web et une application Android alimentés pa
 les PDF de ce dépôt. Pas de serveur, pas de base de données, pas de compte.
 
 - **Site :** https://aym3ntn-ai.github.io/classeuri/
-- **Application Android :** [dernière version](https://github.com/aym3ntn-ai/classeuri/releases/latest)
+- **Application Android :** [télécharger l'APK](https://github.com/aym3ntn-ai/classeuri/releases/latest/download/classeuri.apk) · [toutes les versions](https://github.com/aym3ntn-ai/classeuri/releases)
 
 ## Ajouter un cours
 
@@ -68,10 +68,12 @@ icon: bolt          # book, bolt, chip, wave, atom, function, code, flask, globe
 
 ## Installer l'application Android
 
-1. Sur le téléphone, ouvrez la page
-   [Releases](https://github.com/aym3ntn-ai/classeuri/releases/latest).
-2. Téléchargez le fichier `classeuri-X.Y.Z.apk`.
-3. Ouvrez-le. Si Android le demande, autorisez l'installation depuis cette
+1. Sur le téléphone, téléchargez
+   [classeuri.apk](https://github.com/aym3ntn-ai/classeuri/releases/latest/download/classeuri.apk)
+   (toujours la dernière version). Aucun compte GitHub n'est nécessaire.
+2. Les versions précédentes sont sur la page
+   [Releases](https://github.com/aym3ntn-ai/classeuri/releases).
+3. Ouvrez le fichier téléchargé. Si Android le demande, autorisez l'installation depuis cette
    source (navigateur ou gestionnaire de fichiers).
 4. Pour mettre à jour, installez simplement la version suivante par-dessus :
    les cours téléchargés et les réglages sont conservés.

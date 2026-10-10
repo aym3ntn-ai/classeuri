@@ -197,6 +197,28 @@ button {
   padding-right: 10px;
   font-weight: 600;
 }
+.site-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 14px;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 20px 40px;
+}
+
+.site-footer a {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  font-weight: 600;
+  font-size: 14px;
+}
 
 @media (max-width: 480px) {
   .site-header {

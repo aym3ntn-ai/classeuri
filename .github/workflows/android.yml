@@ -152,7 +152,7 @@ jobs:
             echo
             echo "### Installation"
             echo
-            echo "1. Téléchargez **${{ steps.sign.outputs.apk }}** ci-dessous depuis votre téléphone Android."
+            echo "1. Depuis votre téléphone Android, téléchargez **${{ steps.sign.outputs.apk }}** ci-dessous."
             echo "2. Ouvrez le fichier, puis autorisez l'installation depuis cette source si Android le demande."
             echo "3. Les cours déjà téléchargés et vos réglages sont conservés lors d'une mise à jour."
           } > "$RUNNER_TEMP/notes.md"
@@ -162,7 +162,11 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "${{ steps.version.outputs.tag }}" "${{ steps.sign.outputs.apk }}" \
+          # classeuri.apk keeps the same name in every release, so that
+          # /releases/latest/download/classeuri.apk always serves the newest version.
+          cp "${{ steps.sign.outputs.apk }}" classeuri.apk
+          gh release create "${{ steps.version.outputs.tag }}" "${{ steps.sign.outputs.apk }}" classeuri.apk \
             --target "$GITHUB_SHA" \
             --title "Classeuri ${{ steps.version.outputs.version }}" \
-            --notes-file "$RUNNER_TEMP/notes.md"
+            --notes-file "$RUNNER_TEMP/notes.md" \
+            --latest
