@@ -6,13 +6,29 @@ key, so create the keystore once and keep it for the life of the app.
 
 ## 1. Create the keystore (once)
 
-Needs a JDK (`keytool` ships with it). Run this outside the repo:
+Run this outside the repo. Pick one of the two ways; both give the same kind of file.
+
+**With a JDK** (`keytool` ships with it):
 
 ```bash
 keytool -genkeypair -v -storetype PKCS12 -keystore classeuri-release.jks -alias classeuri -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Classeuri"
 ```
 
-`keytool` asks for a password. With PKCS12 the keystore password and the key
+**Without a JDK**, with the `openssl` that ships with macOS and Linux:
+
+```bash
+openssl req -x509 -newkey rsa:2048 -nodes -days 10000 -subj "/CN=Classeuri" -keyout classeuri-key.pem -out classeuri-cert.pem
+```
+
+```bash
+openssl pkcs12 -export -inkey classeuri-key.pem -in classeuri-cert.pem -name classeuri -out classeuri-release.jks
+```
+
+```bash
+rm classeuri-key.pem classeuri-cert.pem
+```
+
+Either way you are asked for a password. The keystore password and the key
 password are the same.
 
 Back up `classeuri-release.jks` and the password somewhere safe (password
@@ -64,5 +80,9 @@ The workflow builds the APK, signs it, and publishes the release `v1.0.1` with
 `classeuri-1.0.1.apk` attached. A push that changes app code without bumping
 the version still builds an APK, available for 30 days under the workflow run's
 artifacts, but publishes no release.
+
+Until the four secrets exist, every build produces a test APK signed with the
+debug key (`classeuri-X.Y.Z-test.apk`, under the run's artifacts) and no
+release. A test APK must be uninstalled before a real release can be installed.
 
 Pushing PDFs never triggers this workflow.

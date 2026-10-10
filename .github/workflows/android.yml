@@ -3,7 +3,8 @@ name: Android APK
 # Runs only when app code changes, never when PDFs are added.
 # On main, a GitHub Release is published when app/package.json carries a version
 # that has no tag yet; otherwise the APK is only attached to the workflow run.
-# Pull requests build a test APK and never publish.
+# Pull requests, and builds without the signing secrets, produce a test APK and
+# never publish.
 on:
   push:
     branches: [main]
@@ -49,13 +50,10 @@ jobs:
           done
           if [ -z "$missing" ]; then
             echo "SIGNED=true" >> "$GITHUB_ENV"
-          elif [ "$GITHUB_REF" = "refs/heads/main" ]; then
-            echo "::error::Missing repository secret(s):$missing. See docs/ANDROID_SIGNING.md."
-            exit 1
           else
-            # Off main, a build without the key still proves the app compiles.
+            # Without the key the build still proves the app compiles, but nothing is released.
             echo "SIGNED=false" >> "$GITHUB_ENV"
-            echo "::warning::No signing secrets: building a test APK signed with the debug key. It cannot be updated by a real release."
+            echo "::warning::Missing repository secret(s):$missing. Building a test APK signed with the debug key; no release is published. See docs/ANDROID_SIGNING.md."
           fi
 
       - name: Read the app version
@@ -64,7 +62,7 @@ jobs:
           version=$(node -p "require('./app/package.json').version")
           echo "version=$version" >> "$GITHUB_OUTPUT"
           echo "tag=v$version" >> "$GITHUB_OUTPUT"
-          if [ "$GITHUB_REF" != "refs/heads/main" ]; then
+          if [ "$GITHUB_REF" != "refs/heads/main" ] || [ "$SIGNED" != "true" ]; then
             echo "release=false" >> "$GITHUB_OUTPUT"
           elif git rev-parse -q --verify "refs/tags/v$version" >/dev/null; then
             echo "release=false" >> "$GITHUB_OUTPUT"
