@@ -1,0 +1,136 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-10-10T09:49:11.434Z",
+  "revision": "74aeba6283e2322d4e791ea9d262073d28de2097",
+  "baseUrl": "https://aym3ntn-ai.github.io/classeuri/",
+  "years": [
+    {
+      "id": "premiere",
+      "label": "1ʳᵉ année",
+      "semesters": [
+        {
+          "id": "semestre-1",
+          "label": "Semestre 1",
+          "courses": [
+            {
+              "id": "premiere/semestre-1/circuit-elect-et-magnetique",
+              "slug": "circuit-elect-et-magnetique",
+              "name": "Circuit Élect. et Magnétique",
+              "code": "CEM",
+              "folder": "CIRCUIT ELECT ET MAGNETIQUE",
+              "accent": "#1D3FB8",
+              "onAccent": "#FFFFFF",
+              "icon": "bolt",
+              "sections": [
+                {
+                  "kind": "lesson",
+                  "documents": [
+                    {
+                      "id": "premiere/semestre-1/circuit-elect-et-magnetique/lesson/cours-circuits-electriques-regime-continu-eea",
+                      "slug": "cours-circuits-electriques-regime-continu-eea",
+                      "title": "Cours Circuits Electriques Regime Continu EEA",
+                      "path": "premiere/semestre-1/CIRCUIT ELECT ET MAGNETIQUE/Cours_Circuits_Electriques_Regime_Continu_EEA.pdf",
+                      "url": "https://aym3ntn-ai.github.io/classeuri/files/premiere/semestre-1/CIRCUIT%20ELECT%20ET%20MAGNETIQUE/Cours_Circuits_Electriques_Regime_Continu_EEA.pdf",
+                      "size": 26515,
+                      "pages": 15,
+                      "updatedAt": "2026-10-10T09:29:51.000Z",
+                      "hash": "41a6398df52e8074d55d3aaac49a81dab389f30cd9a29f38ca0c8fb8cec25016"
+                    }
+                  ]
+                },
+                {
+                  "kind": "exercices",
+                  "documents": [
+                    {
+                      "id": "premiere/semestre-1/circuit-elect-et-magnetique/exercices/serie-1",
+                      "slug": "serie-1",
+                      "title": "serie 1",
+                      "path": "premiere/semestre-1/CIRCUIT ELECT ET MAGNETIQUE/serie 1.pdf",
+                      "url": "https://aym3ntn-ai.github.io/classeuri/files/premiere/semestre-1/CIRCUIT%20ELECT%20ET%20MAGNETIQUE/serie%201.pdf",
+                      "size": 786689,
+                      "pages": 2,
+                      "updatedAt": "2026-10-10T09:29:51.000Z",
+                      "hash": "6129137d7e7ba5e789cc2cf3395c86749032a8a13b4c6d393c0b1fecb9695c6e"
+                    },
+                    {
+                      "id": "premiere/semestre-1/circuit-elect-et-magnetique/exercices/serie-1-plus-plus",
+                      "slug": "serie-1-plus-plus",
+                      "title": "serie 1++",
+                      "path": "premiere/semestre-1/CIRCUIT ELECT ET MAGNETIQUE/serie 1++.pdf",
+                      "url": "https://aym3ntn-ai.github.io/classeuri/files/premiere/semestre-1/CIRCUIT%20ELECT%20ET%20MAGNETIQUE/serie%201%2B%2B.pdf",
+                      "size": 713774,
+                      "pages": 2,
+                      "updatedAt": "2026-10-10T09:29:51.000Z",
+                      "hash": "159b93a16181bd7d8a95d424204baa2083e6b4d819ec7cb56738ff396a9062c0"
+                    },
+                    {
+                      "id": "premiere/semestre-1/circuit-elect-et-magnetique/exercices/tds-circuits-electriques",
+                      "slug": "tds-circuits-electriques",
+                      "title": "TDs-circuits-electriques",
+                      "path": "premiere/semestre-1/CIRCUIT ELECT ET MAGNETIQUE/TDs-circuits-electriques.pdf",
+                      "url": "https://aym3ntn-ai.github.io/classeuri/files/premiere/semestre-1/CIRCUIT%20ELECT%20ET%20MAGNETIQUE/TDs-circuits-electriques.pdf",
+                      "size": 5125581,
+                      "pages": 67,
+                      "updatedAt": "2026-10-10T09:29:51.000Z",
+                      "hash": "5670d640e8693a5bf546f256cb5b7f23adb7d325795e634785034dce4e1a8351"
+                    }
+                  ]
+                }
+              ],
+              "documentCount": 4,
+              "totalSize": 6652559,
+              "updatedAt": "2026-10-10T09:29:51.000Z"
+            },
+            {
+              "id": "premiere/semestre-1/circuit-numerique",
+              "slug": "circuit-numerique",
+              "name": "Circuit Numérique",
+              "code": "CN",
+              "folder": "CIRCUIT NUMERIQUE",
+              "accent": "#0F766E",
+              "onAccent": "#FFFFFF",
+              "icon": "chip",
+              "sections": [
+                {
+                  "kind": "lesson",
+                  "documents": [
+                    {
+                      "id": "premiere/semestre-1/circuit-numerique/lesson/cours-systemes-de-numeration-l1-eea-issat-sousse",
+                      "slug": "cours-systemes-de-numeration-l1-eea-issat-sousse",
+                      "title": "Cours Systemes de Numeration L1 EEA ISSAT Sousse",
+                      "path": "premiere/semestre-1/CIRCUIT NUMERIQUE/Cours_Systemes_de_Numeration_L1_EEA_ISSAT_Sousse.pdf",
+                      "url": "https://aym3ntn-ai.github.io/classeuri/files/premiere/semestre-1/CIRCUIT%20NUMERIQUE/Cours_Systemes_de_Numeration_L1_EEA_ISSAT_Sousse.pdf",
+                      "size": 206602,
+                      "pages": 19,
+                      "updatedAt": "2026-10-10T09:29:51.000Z",
+                      "hash": "24d9b9e2dd256bdb1019ff604002ef8093eb2b675fd699af3d2ee5156d8e7db0"
+                    }
+                  ]
+                },
+                {
+                  "kind": "resume",
+                  "documents": [
+                    {
+                      "id": "premiere/semestre-1/circuit-numerique/resume/resume-systemes-de-numeration-l1-eea",
+                      "slug": "resume-systemes-de-numeration-l1-eea",
+                      "title": "Resume Systemes de Numeration L1 EEA",
+                      "path": "premiere/semestre-1/CIRCUIT NUMERIQUE/Resume_Systemes_de_Numeration_L1_EEA.pdf",
+                      "url": "https://aym3ntn-ai.github.io/classeuri/files/premiere/semestre-1/CIRCUIT%20NUMERIQUE/Resume_Systemes_de_Numeration_L1_EEA.pdf",
+                      "size": 121778,
+                      "pages": 4,
+                      "updatedAt": "2026-10-10T09:29:51.000Z",
+                      "hash": "455a118203f87a79f45d7c913a9660baaca64d1e8d4ec6a9eef39d6bdc5e3aa5"
+                    }
+                  ]
+                }
+              ],
+              "documentCount": 2,
+              "totalSize": 328380,
+              "updatedAt": "2026-10-10T09:29:51.000Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

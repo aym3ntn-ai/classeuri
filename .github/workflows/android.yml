@@ -1,0 +1,169 @@
+name: Android APK
+
+# Runs only when app code changes, never when PDFs are added.
+# On main, a GitHub Release is published when app/package.json carries a version
+# that has no tag yet; otherwise the APK is only attached to the workflow run.
+# Pull requests build a test APK and never publish.
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'app/**'
+      - 'shared/**'
+      - 'package-lock.json'
+      - '.github/workflows/android.yml'
+  pull_request:
+    paths:
+      - 'app/**'
+      - 'shared/**'
+      - 'package-lock.json'
+      - '.github/workflows/android.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android
+  cancel-in-progress: true
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    env:
+      KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+      KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+      KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+      KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # Tags and history are needed to detect a new version and write the notes.
+          fetch-depth: 0
+
+      - name: Check the signing secrets
+        run: |
+          missing=""
+          for name in KEYSTORE_BASE64 KEYSTORE_PASSWORD KEY_ALIAS KEY_PASSWORD; do
+            [ -n "${!name}" ] || missing="$missing ANDROID_$name"
+          done
+          if [ -z "$missing" ]; then
+            echo "SIGNED=true" >> "$GITHUB_ENV"
+          elif [ "$GITHUB_REF" = "refs/heads/main" ]; then
+            echo "::error::Missing repository secret(s):$missing. See docs/ANDROID_SIGNING.md."
+            exit 1
+          else
+            # Off main, a build without the key still proves the app compiles.
+            echo "SIGNED=false" >> "$GITHUB_ENV"
+            echo "::warning::No signing secrets: building a test APK signed with the debug key. It cannot be updated by a real release."
+          fi
+
+      - name: Read the app version
+        id: version
+        run: |
+          version=$(node -p "require('./app/package.json').version")
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          echo "tag=v$version" >> "$GITHUB_OUTPUT"
+          if [ "$GITHUB_REF" != "refs/heads/main" ]; then
+            echo "release=false" >> "$GITHUB_OUTPUT"
+          elif git rev-parse -q --verify "refs/tags/v$version" >/dev/null; then
+            echo "release=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::v$version is already released. Bump \"version\" in app/package.json to publish a new release."
+          else
+            echo "release=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: gradle/actions/setup-gradle@v4
+
+      - run: npm ci
+
+      - name: Check the app
+        run: |
+          npm run typecheck --workspace app
+          npm run lint --workspace app
+          npm test --workspace app
+
+      - name: Generate the Android project
+        working-directory: app
+        env:
+          # versionCode must grow with every build for Android to accept the update.
+          ANDROID_VERSION_CODE: ${{ github.run_number }}
+        run: npx expo prebuild --platform android --clean --no-install
+
+      - name: Build the release APK
+        working-directory: app/android
+        run: ./gradlew assembleRelease --no-daemon -PreactNativeArchitectures=arm64-v8a,armeabi-v7a
+
+      # The Expo template signs release builds with the debug key. Re-sign with the
+      # real key so every release can be installed over the previous one.
+      - name: Sign the APK
+        id: sign
+        run: |
+          built=app/android/app/build/outputs/apk/release/app-release.apk
+          if [ "$SIGNED" != "true" ]; then
+            apk="classeuri-${{ steps.version.outputs.version }}-test.apk"
+            cp "$built" "$apk"
+            echo "apk=$apk" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          apk="classeuri-${{ steps.version.outputs.version }}.apk"
+          keystore="$RUNNER_TEMP/release.jks"
+          echo "$KEYSTORE_BASE64" | base64 --decode > "$keystore"
+          build_tools=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -n 1)
+          "$build_tools/apksigner" sign \
+            --ks "$keystore" --ks-key-alias "$KEY_ALIAS" \
+            --ks-pass env:KEYSTORE_PASSWORD --key-pass env:KEY_PASSWORD \
+            --out "$apk" "$built"
+          rm "$keystore"
+          "$build_tools/apksigner" verify --print-certs "$apk"
+          echo "apk=$apk" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.sign.outputs.apk }}
+          path: ${{ steps.sign.outputs.apk }}
+          retention-days: 30
+
+      - name: Write the release notes
+        if: steps.version.outputs.release == 'true'
+        run: |
+          version="${{ steps.version.outputs.version }}"
+          custom="app/release-notes/v$version.md"
+          previous=$(git describe --tags --abbrev=0 --match 'v*' 2>/dev/null || true)
+          {
+            echo "## Classeuri $version"
+            echo
+            if [ -f "$custom" ]; then
+              cat "$custom"
+            else
+              echo "### Changements"
+              echo
+              git log --no-merges --format='- %s' ${previous:+"$previous"..HEAD} -- app shared
+            fi
+            echo
+            echo "### Installation"
+            echo
+            echo "1. Téléchargez **${{ steps.sign.outputs.apk }}** ci-dessous depuis votre téléphone Android."
+            echo "2. Ouvrez le fichier, puis autorisez l'installation depuis cette source si Android le demande."
+            echo "3. Les cours déjà téléchargés et vos réglages sont conservés lors d'une mise à jour."
+          } > "$RUNNER_TEMP/notes.md"
+
+      - name: Publish the GitHub Release
+        if: steps.version.outputs.release == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${{ steps.version.outputs.tag }}" "${{ steps.sign.outputs.apk }}" \
+            --target "$GITHUB_SHA" \
+            --title "Classeuri ${{ steps.version.outputs.version }}" \
+            --notes-file "$RUNNER_TEMP/notes.md"

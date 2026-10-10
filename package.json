@@ -1,0 +1,25 @@
+{
+  "name": "classeuri",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "workspaces": [
+    "shared",
+    "app"
+  ],
+  "scripts": {
+    "catalog": "node scripts/build-catalog.ts",
+    "catalog:example": "node scripts/build-catalog.ts --out docs/catalog.example.json",
+    "test": "node --test \"scripts/test/*.test.ts\"",
+    "typecheck": "tsc -p scripts && tsc -p shared",
+    "serve:content": "node scripts/serve-content.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "pdfjs-dist": "^5.4.0",
+    "typescript": "^5.9.0",
+    "yaml": "^2.8.0"
+  }
+}
