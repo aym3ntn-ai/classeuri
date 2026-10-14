@@ -1,0 +1,226 @@
+---
+import { Check, Copy, Download, Share, SquarePlus } from '@lucide/astro';
+import Base from '../../layouts/Base.astro';
+import { href } from '../../lib/catalog';
+import { t } from '../../lib/i18n';
+
+const APK_URL = 'https://github.com/aym3ntn-ai/classeuri/releases/latest/download/classeuri.apk';
+const siteUrl = new URL(href(), Astro.site).href;
+const stepIcons = [null, Share, SquarePlus, Check];
+---
+
+<Base title={t.install.pageTitle}>
+  <h1 class="screen-title">{t.install.title}</h1>
+  <p class="intro">{t.install.intro}</p>
+
+  <!-- Without JavaScript every section shows; the script keeps the one for this device. -->
+  <p class="notice" data-show="installed" hidden>{t.install.installed}</p>
+
+  <p class="notice" data-show="in-app" hidden>{t.install.inAppBrowser}</p>
+
+  <section class="card block" data-show="ios">
+    <h2>{t.install.iosTitle}</h2>
+    <ol class="steps">
+      {
+        t.install.iosSteps.map((step, i) => {
+          const Icon = stepIcons[i];
+          return (
+            <li>
+              <span class="num">{i + 1}</span>
+              <span class="text" set:html={step} />
+              {Icon && <Icon class="icon" size={22} stroke-width={1.8} aria-hidden="true" />}
+            </li>
+          );
+        })
+      }
+    </ol>
+    <p class="caption">{t.install.iosOtherBrowser}</p>
+  </section>
+
+  <section class="card block" data-show="android">
+    <h2>{t.install.androidTitle}</h2>
+    <a class="primary" href={APK_URL}>
+      <Download size={20} stroke-width={1.8} aria-hidden="true" />
+      {t.install.androidApk}
+    </a>
+    <p class="caption">{t.install.androidApkHint}</p>
+    <h3>{t.install.androidPwa}</h3>
+    <button type="button" class="secondary" data-install-pwa hidden>{t.install.footerLink}</button>
+    <p class="caption" set:html={t.install.androidPwaSteps} />
+  </section>
+
+  <section class="card block" data-show="desktop">
+    <p>{t.install.desktop}</p>
+    <div class="link-row">
+      <code>{siteUrl}</code>
+      <button type="button" class="secondary" data-copy={siteUrl}>
+        <Copy size={18} stroke-width={1.8} aria-hidden="true" />
+        <span data-copy-label>{t.install.copyLink}</span>
+      </button>
+    </div>
+  </section>
+
+  <p class="caption offline">{t.install.offlineNote}</p>
+</Base>
+
+<script define:vars={{ copied: t.install.linkCopied }} is:inline>
+  window.__classeuriCopied = copied;
+</script>
+
+<script>
+  const ua = navigator.userAgent;
+  const isIOS = /iPhone|iPad|iPod/.test(ua) || (ua.includes('Macintosh') && navigator.maxTouchPoints > 1);
+  const isAndroid = /Android/.test(ua);
+  const inApp = /FBAN|FBAV|Instagram|Line\/|Snapchat|TikTok/.test(ua);
+  const standalone = matchMedia('(display-mode: standalone)').matches || (navigator as { standalone?: boolean }).standalone === true;
+
+  const visible = new Set<string>();
+  if (standalone) visible.add('installed');
+  else if (isIOS) {
+    visible.add('ios');
+    if (inApp) visible.add('in-app');
+  } else if (isAndroid) {
+    visible.add('android');
+    if (inApp) visible.add('in-app');
+  } else ['ios', 'android', 'desktop'].forEach((s) => visible.add(s));
+
+  for (const el of document.querySelectorAll<HTMLElement>('[data-show]')) {
+    el.hidden = !visible.has(el.dataset.show!);
+  }
+
+  // Chrome on Android offers a one-tap install when the site qualifies.
+  const installButton = document.querySelector<HTMLButtonElement>('[data-install-pwa]');
+  let deferred: (Event & { prompt: () => Promise<void> }) | null = null;
+  window.addEventListener('beforeinstallprompt', (event) => {
+    event.preventDefault();
+    deferred = event as typeof deferred;
+    if (installButton) installButton.hidden = false;
+  });
+  installButton?.addEventListener('click', async () => {
+    if (!deferred) return;
+    await deferred.prompt();
+    deferred = null;
+    installButton.hidden = true;
+  });
+
+  for (const button of document.querySelectorAll<HTMLButtonElement>('[data-copy]')) {
+    button.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(button.dataset.copy!);
+        const label = button.querySelector('[data-copy-label]');
+        if (label) label.textContent = (window as { __classeuriCopied?: string }).__classeuriCopied ?? '';
+      } catch {}
+    });
+  }
+</script>
+
+<style>
+  .intro {
+    max-width: 640px;
+    margin: 10px 0 20px;
+    color: var(--ink-2);
+  }
+
+  .notice {
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: var(--ink);
+    color: var(--on-ink);
+    font-weight: 600;
+  }
+
+  .block {
+    padding: 18px;
+    margin-top: 14px;
+  }
+
+  .block h2 {
+    margin: 0 0 12px;
+    font-size: 17px;
+    line-height: 22px;
+  }
+
+  .block h3 {
+    margin: 18px 0 6px;
+    font-size: 15px;
+  }
+
+  .steps {
+    list-style: none;
+    margin: 0 0 10px;
+    padding: 0;
+  }
+
+  .steps li {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 10px 0;
+  }
+
+  .steps li + li {
+    border-top: 1px solid var(--row-line);
+  }
+
+  .num {
+    flex: none;
+    width: 28px;
+    height: 28px;
+    display: grid;
+    place-items: center;
+    border-radius: 50%;
+    background: var(--ink);
+    color: var(--on-ink);
+    font-weight: 700;
+    font-size: 14px;
+  }
+
+  .text {
+    flex: 1;
+    padding-top: 3px;
+  }
+
+  .steps :global(.icon) {
+    flex: none;
+    margin-top: 3px;
+    color: var(--ink-2);
+  }
+
+  .primary,
+  .secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 48px;
+    padding: 0 18px;
+    border-radius: 12px;
+    font-weight: 700;
+  }
+
+  .primary {
+    background: var(--ink);
+    color: var(--on-ink);
+  }
+
+  .secondary {
+    border: 1px solid var(--line);
+    background: var(--bg);
+  }
+
+  .link-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .link-row code {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    overflow-wrap: anywhere;
+  }
+
+  .offline {
+    margin-top: 18px;
+  }
+</style>

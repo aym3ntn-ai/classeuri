@@ -220,6 +220,13 @@ button {
   font-size: 14px;
 }
 
+/* Install prompts make no sense inside the installed app. */
+@media (display-mode: standalone) {
+  .install-only {
+    display: none !important;
+  }
+}
+
 @media (max-width: 480px) {
   .site-header {
     padding: 12px 16px;

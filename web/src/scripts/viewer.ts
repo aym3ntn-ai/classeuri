@@ -184,7 +184,8 @@ async function load() {
     const previous = pdf;
     pdf = null;
     void previous?.destroy();
-    const loaded = await pdfjs.getDocument({ url: file.url }).promise;
+    // Whole-file requests (no HTTP ranges) so the service worker can cache the PDF.
+    const loaded = await pdfjs.getDocument({ url: file.url, disableRange: true, disableStream: true }).promise;
     if (mine !== generation) return void loaded.destroy();
     pdf = loaded;
 

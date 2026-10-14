@@ -14,6 +14,16 @@ src/lib/                                                catalog access, links, i
 
 UI strings live in `shared/src/fr.ts`. Run every command below from the repo root.
 
+## Installable app (PWA)
+
+The site installs to the home screen on iOS (Safari → Share → Add to Home
+Screen) and Android. `src/pages/manifest.webmanifest.ts` generates the manifest;
+the Apple meta tags are in `src/layouts/Base.astro`; `public/sw.js` is the
+service worker (hashed assets cache-first; pages, `catalog.json` and PDFs
+network-first, so a document opened once stays readable offline; at most 80
+PDFs are kept). `src/pages/installer/` is the install page linked from the
+footer and from a dismissible banner shown to iPhone visitors.
+
 ## Run
 
 Generate `catalog.json` and copy the PDFs into `web/public/` (repeat after adding PDFs):

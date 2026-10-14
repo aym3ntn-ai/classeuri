@@ -4,6 +4,7 @@ Ma bibliothèque de cours : un site web et une application Android alimentés pa
 les PDF de ce dépôt. Pas de serveur, pas de base de données, pas de compte.
 
 - **Site :** https://aym3ntn-ai.github.io/classeuri/
+- **iPhone et iPad :** [installer depuis le site](https://aym3ntn-ai.github.io/classeuri/installer/)
 - **Application Android :** [télécharger l'APK](https://github.com/aym3ntn-ai/classeuri/releases/latest/download/classeuri.apk) · [toutes les versions](https://github.com/aym3ntn-ai/classeuri/releases)
 
 ## Ajouter un cours
@@ -80,6 +81,19 @@ icon: bolt          # book, bolt, chip, wave, atom, function, code, flask, globe
 
 Une nouvelle version n'est publiée que lorsque le code de l'application change,
 jamais lors d'un simple ajout de PDF.
+
+## Installer sur iPhone ou iPad
+
+Pas d'App Store : le site s'installe comme une application (PWA), gratuitement.
+
+1. Ouvrez https://aym3ntn-ai.github.io/classeuri/ dans **Safari**.
+2. Touchez **Partager** (le carré avec une flèche vers le haut). S'il n'est pas
+   visible, touchez d'abord **•••**.
+3. Choisissez **Sur l'écran d'accueil**, puis **Ajouter**.
+
+Classeuri s'ouvre alors en plein écran depuis son icône. Les documents déjà
+ouverts restent lisibles sans connexion. Les instructions détaillées sont sur la
+page [Installer l'application](https://aym3ntn-ai.github.io/classeuri/installer/).
 
 ## Contenu
 

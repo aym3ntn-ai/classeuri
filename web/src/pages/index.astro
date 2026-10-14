@@ -1,7 +1,8 @@
 ---
+import { ChevronRight, X } from '@lucide/astro';
 import CourseIcon from '../components/CourseIcon.astro';
 import Base from '../layouts/Base.astro';
-import { courseHref, loadCatalog } from '../lib/catalog';
+import { courseHref, href, loadCatalog } from '../lib/catalog';
 import { t } from '../lib/i18n';
 
 const catalog = loadCatalog();
@@ -17,6 +18,20 @@ const current = semesters.at(-1)?.key;
     {semesters.length > 0 ? `${semesters.at(-1)!.year.label} · ${semesters.at(-1)!.semester.label}` : ''}
   </p>
   <h1 class="screen-title">{t.home.title}</h1>
+
+  <div class="ios-banner install-only" data-ios-banner hidden>
+    <a href={href('installer/')}>
+      <img src={href('apple-touch-icon.png')} alt="" width="40" height="40" />
+      <span>
+        <b>{t.install.banner}</b>
+        <span class="caption">{t.install.bannerAction}</span>
+      </span>
+      <ChevronRight size={20} stroke-width={2} aria-hidden="true" />
+    </a>
+    <button type="button" data-dismiss aria-label={t.install.dismiss}>
+      <X size={18} stroke-width={2} aria-hidden="true" />
+    </button>
+  </div>
 
   {
     semesters.length > 1 && (
@@ -61,6 +76,24 @@ const current = semesters.at(-1)?.key;
 </Base>
 
 <script>
+  // iPhone and iPad visitors in a browser tab get a pointer to the install page.
+  const banner = document.querySelector<HTMLElement>('[data-ios-banner]');
+  const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.userAgent.includes('Macintosh') && navigator.maxTouchPoints > 1);
+  const standalone = matchMedia('(display-mode: standalone)').matches || (navigator as { standalone?: boolean }).standalone === true;
+  let dismissed = false;
+  try {
+    dismissed = localStorage.getItem('classeuri.iosBanner') === 'dismissed';
+  } catch {}
+  if (banner && isIOS && !standalone && !dismissed) {
+    banner.hidden = false;
+    banner.querySelector('[data-dismiss]')!.addEventListener('click', () => {
+      banner.hidden = true;
+      try {
+        localStorage.setItem('classeuri.iosBanner', 'dismissed');
+      } catch {}
+    });
+  }
+
   const tabs = [...document.querySelectorAll<HTMLButtonElement>('[data-semester-tab]')];
   const sections = [...document.querySelectorAll<HTMLElement>('[data-semester]')];
   const label = document.querySelector<HTMLElement>('[data-current-label]');
@@ -91,6 +124,43 @@ const current = semesters.at(-1)?.key;
 </script>
 
 <style>
+  .ios-banner {
+    display: flex;
+    align-items: center;
+    margin-top: 16px;
+    border-radius: 16px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+  }
+
+  .ios-banner a {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-height: 64px;
+    padding: 10px 6px 10px 12px;
+  }
+
+  .ios-banner img {
+    border-radius: 10px;
+  }
+
+  .ios-banner a > span {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .ios-banner button {
+    width: 44px;
+    height: 44px;
+    display: grid;
+    place-items: center;
+    margin-right: 6px;
+    color: var(--ink-3);
+  }
+
   .label {
     margin: 10px 0 0;
     color: var(--ink-2);
