@@ -117,6 +117,12 @@ export const fr = {
     emptyHint: 'Ajoutez un dossier de PDF au dépôt : il apparaîtra ici.',
   },
 
+  pullToRefresh: {
+    pull: 'Tirez pour actualiser',
+    release: 'Relâchez pour actualiser',
+    refreshing: 'Actualisation…',
+  },
+
   offline: {
     banner: 'Hors ligne — les cours téléchargés restent disponibles',
   },

@@ -46,7 +46,9 @@ async function cacheFirst(request) {
 
 async function networkFirst(request, cacheName) {
   try {
-    const response = await fetch(request);
+    // Revalidate with the server instead of trusting the HTTP cache: GitHub Pages
+    // allows ten minutes of caching, which would hide new documents after a refresh.
+    const response = await fetch(request, { cache: 'no-cache' });
     if (response.status === 200) {
       const cache = await caches.open(cacheName);
       await cache.put(request, response.clone());
